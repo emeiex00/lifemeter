@@ -44,10 +44,15 @@ class GreenDetectorApp:
 
         self.label_risultato = tk.Label(master, text="Percentuale verde: -")
         self.label_risultato.pack(pady=10)
+        
+        # Pulsante per riprodurre il suono senza ricaricare l'immagine
+        self.btn_riproduci_suono = tk.Button(master, text="Riproduci Suono", command=self.riproduci_suono, state=tk.DISABLED)
+        self.btn_riproduci_suono.pack(pady=5)
 
         self.image_path = None
         self.img_originale_tk = None
         self.img_verde_tk = None
+        self.ultima_percentuale = None  # Memorizza l'ultima percentuale calcolata
 
         # Configurazione MIDI
         self.frame_midi = tk.Frame(master)
@@ -135,6 +140,12 @@ class GreenDetectorApp:
                 self.panel_verde.config(image=None)
                 self.panel_verde.image = None
 
+            # Memorizza l'ultima percentuale calcolata
+            self.ultima_percentuale = percentuale
+            
+            # Abilita il pulsante per riprodurre il suono
+            self.btn_riproduci_suono.config(state=tk.NORMAL)
+            
             # Riproduci suono in base alla percentuale
             self.play_green_sound(percentuale)
 
@@ -149,6 +160,10 @@ class GreenDetectorApp:
             self.panel_originale.image = None
             self.panel_verde.config(image=None)
             self.panel_verde.image = None
+            
+            # Disabilita il pulsante per riprodurre il suono in caso di errore
+            self.btn_riproduci_suono.config(state=tk.DISABLED)
+            self.ultima_percentuale = None
 
     def refresh_midi_devices(self):
         try:
@@ -274,6 +289,14 @@ class GreenDetectorApp:
             self.btn_mute.config(text="Mute Audio")
         else:
             self.btn_mute.config(text="Unmute Audio")
+    
+    def riproduci_suono(self):
+        """Riproduce il suono basato sull'ultima percentuale di verde rilevata"""
+        if self.ultima_percentuale is not None:
+            self.play_green_sound(self.ultima_percentuale)
+        else:
+            messagebox.showinfo("Nessun dato", "Carica prima un'immagine per analizzare la percentuale di verde.")
+            self.btn_riproduci_suono.config(state=tk.DISABLED)
 
 if __name__ == "__main__":
     # Controlla se le dipendenze sono installate
